@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>もやしを育てるゲーム</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="app">
+
+  <!-- ============ タイトル画面 ============ -->
+  <section id="screen-title" class="screen">
+    <h1 class="title-logo">もやしを育てる</h1>
+    <img class="title-illust" src="assets/moyashi_normal.jpg" alt="もやし" />
+    <div class="menu-buttons">
+      <button id="btn-start" class="btn btn-primary">New Game</button>
+      <button id="btn-load" class="btn btn-secondary">LOAD</button>
+    </div>
+    <div class="sub-buttons">
+      <button id="btn-credit" class="btn btn-small">クレジット</button>
+      <button id="btn-rule" class="btn btn-small">ルール</button>
+      <button id="btn-titles" class="btn btn-small">称号</button>
+      <button id="btn-settings" class="btn btn-small">⚙</button>
+    </div>
+    <button id="btn-delete-save" class="btn btn-small btn-danger">セーブデータを削除</button>
+  </section>
+
+  <!-- ============ 準備フェイズ ============ -->
+  <section id="screen-prep" class="screen hidden">
+    <header class="phase-header">
+      <h2>準備</h2>
+      <div class="tab-menu">
+        <button class="tab-btn active" data-tab="seed">種購入</button>
+        <button class="tab-btn" data-tab="equipment">設備強化</button>
+        <button class="tab-btn" data-tab="item">アイテム購入</button>
+      </div>
+    </header>
+    <div id="prep-list" class="scroll-list"></div>
+    <div class="gold-display">所持金 <span id="prep-gold">0</span> G</div>
+    <div class="bottom-buttons">
+      <div class="save-title-row">
+        <button id="btn-save" class="btn btn-secondary">セーブ</button>
+        <button id="btn-to-title" class="btn btn-secondary">タイトルへ</button>
+      </div>
+      <button id="btn-next-life" class="btn btn-primary">次のもやし生へ</button>
+    </div>
+  </section>
+
+  <!-- ============ 種まきフェイズ ============ -->
+  <section id="screen-sowing" class="screen hidden">
+    <header class="phase-header">
+      <h2>種まき</h2>
+      <button id="btn-sowing-settings" class="btn btn-small">⚙</button>
+    </header>
+    <img class="pot-illust" src="assets/growth/stage_01.jpg" alt="もやし" draggable="false" />
+    <div class="sowing-controls">
+      <button id="btn-use-item" class="btn btn-secondary">事前アイテムの使用</button>
+      <div id="item-checklist" class="item-checklist"></div>
+    </div>
+    <button id="btn-choose-seed" class="btn btn-secondary">種を選ぶ(<span id="chosen-seed-name">初心者の種</span>)</button>
+    <button id="btn-plant" class="btn btn-primary btn-large">植える</button>
+  </section>
+
+  <!-- ============ 栽培フェイズ ============ -->
+  <section id="screen-growing" class="screen hidden">
+    <header class="phase-header">
+      <h2>栽培</h2>
+      <div id="growing-daytime">1日目 0時</div>
+      <div class="header-buttons">
+        <button id="btn-pause" class="btn btn-small">一時停止</button>
+        <button id="btn-speed" class="btn btn-small">×1</button>
+        <button id="btn-discard" class="btn btn-small btn-danger-small">破棄</button>
+        <button id="btn-growing-settings" class="btn btn-small">⚙</button>
+      </div>
+    </header>
+
+    <div id="pause-overlay" class="pause-overlay hidden">
+      <div class="pause-box">
+        <div class="pause-label">一時停止中</div>
+        <button id="btn-resume" class="btn btn-primary btn-large">再開</button>
+      </div>
+    </div>
+
+    <div id="tutorial-overlay" class="tutorial-overlay hidden">
+      <div class="tutorial-dim"></div>
+      <div id="tutorial-box" class="story-box">
+        <div id="tutorial-speaker" class="story-speaker">???</div>
+        <div id="tutorial-text" class="story-text"></div>
+        <div class="story-next-hint">タップして次へ ▶</div>
+      </div>
+    </div>
+
+    <div id="phase-banner" class="phase-banner hidden">栽培開始!</div>
+
+    <div class="gauge-row">
+      <div id="gauge-box-temp" class="gauge-box">
+        <div class="gauge-label">温度</div>
+        <button id="sprout-badge-temp" class="sprout-badge hidden">🌱お手伝い中</button>
+        <div id="temp-lamp" class="lamp lamp-green"></div>
+        <div id="temp-value" class="gauge-value">20.0℃</div>
+        <div class="gauge-buttons">
+          <button class="adj-btn" data-target="temp" data-dir="-1">−</button>
+          <button class="adj-btn" data-target="temp" data-dir="1">＋</button>
+        </div>
+      </div>
+      <div id="gauge-box-hum" class="gauge-box">
+        <div class="gauge-label">湿度</div>
+        <button id="sprout-badge-hum" class="sprout-badge hidden">🌱お手伝い中</button>
+        <div id="hum-lamp" class="lamp lamp-green"></div>
+        <div id="hum-value" class="gauge-value">92.0%</div>
+        <div class="gauge-buttons">
+          <button class="adj-btn" data-target="hum" data-dir="-1">−</button>
+          <button class="adj-btn" data-target="hum" data-dir="1">＋</button>
+        </div>
+      </div>
+    </div>
+
+    <button id="btn-sproutchan-switch" class="btn btn-secondary hidden">もやし？のお手伝い先を変える</button>
+
+    <div id="pot-area" class="pot-area">
+      <img id="growing-pot-illust" class="pot-illust" src="assets/growth/stage_01.jpg" alt="もやし" draggable="false" />
+      <div id="pest-layer" class="pest-layer"></div>
+      <div id="fairy-layer" class="pest-layer"></div>
+    </div>
+
+    <button id="btn-use-growing-item" class="btn btn-secondary">栽培アイテムを使用</button>
+    <div id="growing-status" class="growing-status">朝　晴れ</div>
+    <div id="growing-score-panel" class="score-panel">
+      <div>温度スコア: <span id="score-temp">0</span></div>
+      <div>湿度スコア: <span id="score-hum">0</span></div>
+      <div>衛生スコア: <span id="score-clean">0</span></div>
+    </div>
+    <div class="status-panel">
+      <span id="growing-generation">もやし1世</span> / 所持金 <span id="growing-gold">0</span> G
+    </div>
+  </section>
+
+  <!-- ============ 出荷フェイズ ============ -->
+  <section id="screen-shipping" class="screen hidden">
+    <header class="phase-header">
+      <h2>出荷</h2>
+    </header>
+    <div id="shipping-seedname" class="shipping-seedname"></div>
+    <div id="shipping-sprout" class="shipping-sprout hidden"></div>
+    <div id="shipping-calc" class="shipping-calc"></div>
+    <div class="shipping-total">
+      もやし度: <span id="shipping-total-score">0</span>
+    </div>
+    <div class="shipping-rank">
+      <div class="shipping-judgement-label">判定</div>
+      <div id="shipping-title" class="shipping-title"></div>
+      <div>RANK <span id="shipping-rank">F</span></div>
+    </div>
+    <div class="shipping-gold">
+      獲得G: <span id="shipping-gold">0</span>
+    </div>
+    <button id="btn-to-prep" class="btn btn-primary btn-large">準備へ</button>
+  </section>
+
+  <!-- ============ バッドエンド画面 ============ -->
+  <section id="screen-badend" class="screen hidden">
+    <div class="badend-box">
+      <div id="badend-illust" class="badend-illust"></div>
+      <div id="badend-name" class="badend-name"></div>
+      <div id="badend-message" class="badend-message"></div>
+      <button id="btn-badend-to-prep" class="btn btn-primary btn-large">準備へ</button>
+    </div>
+  </section>
+
+  <!-- ============ ストーリー会話(NEW GAME開始時) ============ -->
+  <section id="screen-story" class="screen hidden story-screen">
+    <div class="story-bg"></div>
+    <div id="story-flash" class="story-flash hidden"><img alt="" draggable="false" /><div class="noise-layer"></div></div>
+    <div id="story-box" class="story-box">
+      <div id="story-speaker" class="story-speaker">???</div>
+      <div id="story-text" class="story-text"></div>
+      <div class="story-next-hint">タップして次へ ▶</div>
+    </div>
+  </section>
+
+</div>
+
+<audio id="bgm-audio" src="assets/bgm.mp3" loop preload="auto"></audio>
+
+<script src="js/data.js"></script>
+<script src="js/badend-art.js"></script>
+<script src="js/pest-art.js"></script>
+<script src="js/state.js"></script>
+<script src="js/screens/title.js"></script>
+<script src="js/screens/story.js"></script>
+<script src="js/screens/prep.js"></script>
+<script src="js/screens/sowing.js"></script>
+<script src="js/screens/growing.js"></script>
+<script src="js/screens/shipping.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
